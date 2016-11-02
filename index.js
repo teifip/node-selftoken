@@ -3,7 +3,7 @@ const crypto = require('crypto');
 module.exports = function(options) {
   this.lifecycle = (options && options.tokenLifecycle > 0)
     ? Math.ceil(options.tokenLifecycle * 1000)
-    : 18000; // 3 minutes
+    : 180000; // 3 minutes
 
   this.iter = (options && options.pbkdf2Iterations > 1)
     ? Math.ceil(options.pbkdf2Iterations)
