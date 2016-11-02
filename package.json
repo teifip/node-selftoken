@@ -1,0 +1,24 @@
+{
+  "name": "node-selftoken",
+  "version": "0.0.1",
+  "description": "Simple signed tokens for web workflows",
+  "main": "index.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teifip/node-selftoken.git"
+  },
+  "keywords": [
+    "token",
+    "jws",
+    "jwt"
+  ],
+  "author": "Paolo Fiorini <teifip@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/teifip/node-selftoken/issues"
+  },
+  "homepage": "https://github.com/teifip/node-selftoken#readme"
+}
