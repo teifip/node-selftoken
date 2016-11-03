@@ -1,13 +1,13 @@
-const TokenHandler = require('./selftoken.js');
+const TokenHandler = require('node-selftoken');
 
 // INITIALIZE THE TOKEN HANDLER
 
 var selftoken = new TokenHandler({
-  tokenLifecycle: 3,  // This is a very short-lived token
+  tokenLifecycle: 3,  // This is a very short-lived token (3 seconds)
   pbkdf2Iterations: 10
 });
 
-// TEST
+// TEST CASES
 
 var str = 'Hello world!';
 
