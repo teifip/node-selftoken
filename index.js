@@ -9,6 +9,10 @@ module.exports = function(options) {
     ? Math.ceil(options.pbkdf2Iterations)
     : 1; // single iteration
 
+  this.len = (options && options.hmacLength >= 16 && options.hmacLength <= 32)
+    ? Math.ceil(options.hmacLength)
+    : 16; // 16 octets
+
   this.pwd = crypto.randomBytes(32);
 
   this.generate = function(payload, callback) {
@@ -23,8 +27,9 @@ module.exports = function(options) {
         } else {
           var hash = crypto.createHmac('sha256', key);
           hash.update(data);
-          var signature = Buffer.concat([salt, hash.digest().slice(0, 16)]);
-          callback(null, b64urlencode(data) + '.' + b64urlencode(signature));
+          var mac = Buffer.concat([salt, hash.digest().slice(0, this.len)]);
+          var dataB64u = b64tob64url(Buffer.from(data).toString('base64'));
+          callback(null, dataB64u + '.' + b64tob64url(mac.toString('base64')));
         }
       });
     }
@@ -32,16 +37,16 @@ module.exports = function(options) {
 
   this.verify = function(token, callback) {
     var tokenComponents = token.split('.');
-    var data = b64urldecode(tokenComponents[0]);
-    var signature = b64urldecode(tokenComponents[1] || '');
-    var salt = signature.slice(0, 16);
+    var data = Buffer.from(tokenComponents[0], 'base64');
+    var mac = Buffer.from(tokenComponents[1] || '', 'base64');
+    var salt = mac.slice(0, 16);
     crypto.pbkdf2(this.pwd, salt, this.iter, 16, 'sha256', (error, key) => {
       if (error) {
         callback('Error: Could not verify token');
       } else {
         var hash = crypto.createHmac('sha256', key);
         hash.update(data);
-        if (signature.slice(16).equals(hash.digest().slice(0, 16))) {
+        if (mac.slice(16).equals(hash.digest().slice(0, this.len))) {
           try {
             var parsedData = JSON.parse(data.toString());
             if (Date.now() > parsedData.e) {
@@ -50,7 +55,7 @@ module.exports = function(options) {
               callback(null, parsedData.p);
             }
           } catch (error) {
-            callback('Error: Invalid token -');
+            callback('Error: Invalid token');
           }
         } else {
           callback('Error: Invalid token');
@@ -62,14 +67,6 @@ module.exports = function(options) {
 
 // ============================================================================
 
-function b64urlencode(str) {
-  return Buffer.from(str)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-}
-
-function b64urldecode(str) {
-  return Buffer.from(str.replace(/\-/g, '+').replace(/_/g, '/'), 'base64');
+function b64tob64url(str) {
+  return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }

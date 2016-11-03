@@ -4,7 +4,8 @@ const TokenHandler = require('node-selftoken');
 
 var selftoken = new TokenHandler({
   tokenLifecycle: 3,  // This is a very short-lived token (3 seconds)
-  pbkdf2Iterations: 10
+  pbkdf2Iterations: 10,
+  hmacLength: 32
 });
 
 // TEST CASES
