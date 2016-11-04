@@ -1,6 +1,6 @@
 {
   "name": "node-selftoken",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Simple integrity-protected tokens for web workflows",
   "main": "index.js",
   "scripts": {

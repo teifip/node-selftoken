@@ -43,11 +43,11 @@ The following options are defined:
 
 | Options            | Use   |
 |--------------------|-------|
-| `tokenLifecycle`   | Validity of the tokens in seconds; default value is `180` seconds (3 minutes); token validation fails after the token validity has expired
+| `tokenLifecycle`   | Validity of the tokens in seconds; default value is `180` seconds (3 minutes); token validation fails after the token validity has expired. Enforcement of time validity is disabled if `tokenLifecycle` is equal to `0`. This choice may be suitable if the input string already contains a timestamp which is checked elsewhere in the server code
 | `pbkdf2Iterations` | Number of SHA-256 iterations used to derive the HMAC key from the long-term password; default value is `1` to save resources; a decent level of protection of the long-term password is anyhow provided by the use of a different random salt at each token generation
 | `hmacLength`       | Number of SHA-256 HMAC octets that are actually used; default value is `16` (HMAC truncated to 16 octets); allowed values are in the range [16..32]      |
 
-The long-term password is auto-generated when the token handler is instatiated. Therefore, there is no option to configure it.
+The long-term password is auto-generated when the token handler is instantiated. Therefore, there is no option to configure it.
 
 ## Token handler use
 

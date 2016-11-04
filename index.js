@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
 module.exports = function(options) {
-  this.lifecycle = (options && options.tokenLifecycle > 0)
+  this.lifecycle = (options && options.tokenLifecycle >= 0)
     ? Math.ceil(options.tokenLifecycle * 1000)
     : 180000; // 3 minutes
 
@@ -19,7 +19,11 @@ module.exports = function(options) {
     if (typeof payload !== 'string') {
       callback('Error: Input data is not a string');
     } else {
-      var data = JSON.stringify({p: payload, e: Date.now() + this.lifecycle});
+      if (this.lifecycle > 0) {
+        var data = JSON.stringify({p: payload, e: Date.now() + this.lifecycle});
+      } else {
+        var data = JSON.stringify({p: payload});
+      }
       var salt = crypto.randomBytes(16);
       crypto.pbkdf2(this.pwd, salt, this.iter, 16, 'sha256', (error, key) => {
         if (error) {
@@ -49,7 +53,7 @@ module.exports = function(options) {
         if (mac.slice(16).equals(hash.digest().slice(0, this.len))) {
           try {
             var parsedData = JSON.parse(data.toString());
-            if (Date.now() > parsedData.e) {
+            if (parsedData.e && Date.now() > parsedData.e) {
               callback('Error: Expired token');
             } else {
               callback(null, parsedData.p);
