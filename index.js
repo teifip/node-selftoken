@@ -7,11 +7,11 @@ module.exports = function(options) {
 
   this.iter = (options && options.pbkdf2Iterations > 1)
     ? Math.ceil(options.pbkdf2Iterations)
-    : 1; // single iteration
+    : 1; // single SHA-256 iteration
 
   this.len = (options && options.hmacLength >= 16 && options.hmacLength <= 32)
     ? Math.ceil(options.hmacLength)
-    : 16; // 16 octets
+    : 16; // SHA-256 truncated to 16 octets
 
   this.pwd = crypto.randomBytes(32);
 

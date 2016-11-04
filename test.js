@@ -8,7 +8,7 @@ var selftoken = new TokenHandler({
   hmacLength: 32
 });
 
-// TEST CASES
+// SIMPLE TEST CASES
 
 var str = 'Hello world!';
 
