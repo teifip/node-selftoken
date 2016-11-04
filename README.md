@@ -80,8 +80,23 @@ selftoken.verify(token, (error, outputString) => {
 
 });
 ```
+
 Note than token validation fails - and an error is returned - both in case the token has been tampered and in case the token has expired.
 
+```javascript
+selftoken.verify(token, (error, outputString) => {
+  if (error && error.message === 'Expired token') {
+    // Expired token
+
+  } else if (error) {
+    // Tampered token
+
+  } else {
+    // validated outputString
+
+  }
+});
+```
 One case in which a web workflow token may expire if when the user leaves the workflow unattended for longer than acceptable (e.g. by not completing a form submission). Therefore, the most common reaction to an expired token is to direct the user back to the beginning of the workflow and start again.
 
 ## Token length
@@ -111,7 +126,7 @@ selftoken.generate(payload, (error, token) => {
   console.log(token);
   // eyJwIjoie1widHJhbnNhY3Rpb25JZFwiOlwiMTIzZTQ1NjctZTg5Yi0xMmQzLWE0NTYtNDI2NjU1NDQwMDAwXCIsXCJwYXltZW50SWRcIjpcIjU1MGU4NDAwLWUyOWItMTFkNC1hNzE2LTQ0NjY1NTQ0MDAwMFwiLFwidXNlclwiOlwibWFpbHRvOmphY2suc3BhcnJvd0BleGFtcGxlLmNvbVwifSIsImUiOjE0NzgxNDU5MDU1MzB9.Cp8jJnUiR4YQXnAnGmtnI8NyCBU6JwCU5xjKmBrgDAk
   console.log(token.length);
-  // 292 (with default hmacLength)
+  // 292 (with tokenLifecycle > 0 and default hmacLength)
 });
 ```
 The longer the payload, the more negligible the difference in size between the token and the simple base64-encoding.

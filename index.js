@@ -17,7 +17,7 @@ module.exports = function(options) {
 
   this.generate = function(payload, callback) {
     if (typeof payload !== 'string') {
-      callback('Error: Input data is not a string');
+      callback(new Error('Input data is not a string'));
     } else {
       if (this.lifecycle > 0) {
         var data = JSON.stringify({p: payload, e: Date.now() + this.lifecycle});
@@ -27,7 +27,7 @@ module.exports = function(options) {
       var salt = crypto.randomBytes(16);
       crypto.pbkdf2(this.pwd, salt, this.iter, 16, 'sha256', (error, key) => {
         if (error) {
-          callback('Error: Could not generate signature key');
+          callback(error);
         } else {
           var hash = crypto.createHmac('sha256', key);
           hash.update(data);
@@ -46,23 +46,22 @@ module.exports = function(options) {
     var salt = mac.slice(0, 16);
     crypto.pbkdf2(this.pwd, salt, this.iter, 16, 'sha256', (error, key) => {
       if (error) {
-        callback('Error: Could not verify token');
+        callback(error);
       } else {
         var hash = crypto.createHmac('sha256', key);
         hash.update(data);
         if (mac.slice(16).equals(hash.digest().slice(0, this.len))) {
-          try {
-            var parsedData = JSON.parse(data.toString());
-            if (parsedData.e && Date.now() > parsedData.e) {
-              callback('Error: Expired token');
+          safeParse(data.toString(), (error, parsedData) => {
+            if (error) {
+              callback(error);
+            } else if (parsedData.e && Date.now() > parsedData.e) {
+              callback(new Error('Expired token'));
             } else {
               callback(null, parsedData.p);
             }
-          } catch (error) {
-            callback('Error: Invalid token');
-          }
+          });
         } else {
-          callback('Error: Invalid token');
+          callback(new Error('Invalid token'));
         }
       }
     });
@@ -73,4 +72,12 @@ module.exports = function(options) {
 
 function b64tob64url(str) {
   return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+function safeParse(str, callback) {
+  try {
+    callback(null, JSON.parse(str));
+  } catch (error) {
+    callback(error);
+  }
 }

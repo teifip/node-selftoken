@@ -1,6 +1,6 @@
 const TokenHandler = require('node-selftoken');
 
-// INITIALIZE THE TOKEN HANDLER
+// ===== INITIALIZE THE TOKEN HANDLER =====
 
 var selftoken = new TokenHandler({
   tokenLifecycle: 3,  // This is a very short-lived token (3 seconds)
@@ -8,30 +8,45 @@ var selftoken = new TokenHandler({
   hmacLength: 32
 });
 
-// SIMPLE TEST CASES
+// ===== TEST CASES =====
 
-var str = 'Hello world!';
+// INVALID INPUT
+console.log('\nCalling token generation API with input other than string...');
+selftoken.generate(1000, (error, token) => {
+  console.log('Error message:\n', error.message);
 
-selftoken.generate(str, (error, token) => {
-  console.log('\nHere is the token:', token);
+  // POSITIVE CASE
+  console.log('\nCalling token generation API with valid input...');
+  var str = 'Hello Node.js world!';
+  console.log('Input string:\n', str);
+  selftoken.generate(str, (error, token) => {
+    console.log('Token:\n', token);
+    console.log('\nVerifying the token...');
+    selftoken.verify(token, (error, result) => {
+      console.log('Error object:\n', error);
+      console.log('Validated string:\n', result);
 
-  console.log('\nVerifying the token...\n');
-  selftoken.verify(token, (error, result) => {
-    console.log('Returned error:', error, '\nRecovered string:', result);
+      // EXPIRED TOKEN
+      console.log('\nGenerating a fresh token...');
+      selftoken.generate(str, (error, token) => {
+        console.log('Waiting for 5s and then verifying the token...');
+        setTimeout(() => {
+          selftoken.verify(token, (error, result) => {
+            console.log('Error message:\n', error.message);
 
-    console.log('\nCreating tampered copy of the token (one char change)...');
-
-    console.log('Verifying the tampered copy of the token...\n');
-
-    selftoken.verify(token.replace(token[10], '&'), (error, result) => {
-      console.log('Returned error:', error, '\nRecovered string:', result);
-
-      console.log('\nWaiting 5s and then verifying again the original token...\n');
-      setTimeout(() => {
-        selftoken.verify(token, (error, result) => {
-          console.log('Returned error:', error, '\nRecovered string:', result);
-        });
-      }, 5000);
+            // TAMPERED TOKEN - TRIVIAL CHAR REPLACEMENT CASE
+            console.log('\nGenerating a new token...');
+            selftoken.generate(str, (error, token) => {
+              console.log('Creating tampered version of the token...');
+              var tamperedToken = token.replace(token[10], '&');
+              console.log('Verifying the tampered token...');
+              selftoken.verify(tamperedToken, (error, result) => {
+                console.log('Error message:\n', error.message);
+              });
+            });
+          });
+        }, 5000); // 5s wait
+      });
     });
   });
 });
