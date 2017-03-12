@@ -16,7 +16,7 @@ module.exports = function(options) {
   this.pwd = crypto.randomBytes(32);
 
   this.generate = function(payload, callback) {
-    if (!payload || typeof payload !== 'string') {
+    if (typeof payload !== 'string') {
       callback(new Error('Input data is not a string'));
       return;
     }
@@ -40,7 +40,7 @@ module.exports = function(options) {
   }
 
   this.verify = function(token, callback) {
-    if (!token || typeof token !== 'string') {
+    if (typeof token !== 'string') {
       callback(new Error('Invalid token'));
       return;
     }
